@@ -23,8 +23,6 @@ exports.createProject = async (req,res,next) => {
         let name = req.file.originalname.split(' ').join('_'); //Construct a new name for the image
         let nameComplete = Date.now() + name;                  //with a unique name
         let image = sharp(req.file.buffer)
-    
-        delete projectObject.id_project
 
         //Stock image and image resize with a width of 450px
         await image.toFile(`./images/${nameComplete}`)
@@ -46,10 +44,8 @@ exports.createProject = async (req,res,next) => {
 //Modify a project
 exports.updateProject = async (req, res, next) => {
     let projectObject = { ...req.body }
-    
-    delete projectObject.id_project
 
-    Project.findOneAndUpdate({_id: req.body.id_project}, { ...projectObject })
+    Project.findOneAndUpdate({_id: req.params.id}, { ...projectObject })
         .then(() =>  res.status(201).json({ message: 'Projet modifié !'}))
         .catch(error => res.status(400).json({ error }));
 }
@@ -57,17 +53,15 @@ exports.updateProject = async (req, res, next) => {
 //Delete one project
 exports.deleteProject = (req, res, next) => {
     Project.findOne({ _id: req.params.id})
-    .then(book => {
-        if (book.userId != req.auth.userId) {
-            res.status(403).json({message: 'unauthorized request'});
-        } else {
-            let filename = book.imageUrl.split('/images/')[1];
-            fs.unlink(`images/${filename}`, () => {
+    .then(project => {
+        let filename = project.imageUrl.split('/images/')[1];
+        fs.unlink(`images/${filename}`, () => {
+            fs.unlink(`images/small/${filename}`, () => {
                 Project.deleteOne({_id: req.params.id})
                 .then(() => { res.status(200).json({message: 'Livre supprimé !'})})
                 .catch(error => res.status(401).json({ error }));
-            });
-        }
+            })
+        })
     })
     .catch( error => res.status(500).json({ error }));
  };
