@@ -5,14 +5,14 @@ const sharp = require('sharp');
 //Get all projects
 exports.getAllProjects = (req, res, next) => {
     Project.find()
-    .then(books => res.status(200).json(books))
+    .then(projects => res.status(200).json(projects))
     .catch(error => res.status(400).json({ error }));
 }
 
 //Get one project by its id
 exports.getOneProject = (req, res, next) => {
     Project.findOne({_id: req.params.id})
-    .then(book => res.status(200).json(book))
+    .then(project => res.status(200).json(project))
     .catch(error => res.status(404).json({ error }));
 }
 
@@ -24,6 +24,8 @@ exports.createProject = async (req,res,next) => {
         let nameComplete = Date.now() + name;                  //with a unique name
         let image = sharp(req.file.buffer)
     
+        delete projectObject.id_project
+
         //Stock image and image resize with a width of 450px
         await image.toFile(`./images/${nameComplete}`)
         await image.resize(450,null).toFile(`./images/small/${nameComplete}`)
@@ -43,6 +45,13 @@ exports.createProject = async (req,res,next) => {
 
 //Modify a project
 exports.updateProject = async (req, res, next) => {
+    let projectObject = { ...req.body }
+    
+    delete projectObject.id_project
+
+    Project.findOneAndUpdate({_id: req.body.id_project}, { ...projectObject })
+        .then(() =>  res.status(201).json({ message: 'Projet modifié !'}))
+        .catch(error => res.status(400).json({ error }));
 }
 
 //Delete one project

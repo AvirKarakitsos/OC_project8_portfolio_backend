@@ -6,8 +6,8 @@ const projectSchema = mongoose.Schema({
 	tags: { type: String, required: true },
 	content: { type: String, required: true },
 	link: { type: String, required: true },
-	language: { type: String, required: true },
-	date:{ type: Date, default: Date.now }
-});
+	language: { type: String, required: true }
+},
+{ timestamps: true });
 
 module.exports = mongoose.model('Project', projectSchema);
