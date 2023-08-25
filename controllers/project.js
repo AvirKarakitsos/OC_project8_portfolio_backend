@@ -50,22 +50,25 @@ exports.updateProject = async (req, res, next) => {
         text: req.body.content[0].text
     }
 
+    delete projectObject.content
+
     Project.findOne({_id: req.params.id})
         .then(project => {
             if (project.content.some((input) => input.language === newContent.language)) {
-                console.log("boucle 1")
                 Project.updateOne({_id: req.params.id, 'content.language': newContent.language},
                     {
+                        ...projectObject,
                         $set: {
                             'content.$.text' : newContent.text
                         }
-                    })
+                    },
+                    )
                     .then(() =>  res.status(201).json({ message: 'Projet modifié !'}))
                     .catch(error => res.status(400).json({ error }));
             } else {
-                console.log("boucle 2")
                 Project.updateOne({_id: req.params.id},
                     {
+                        ...projectObject,
                         $push: {
                             content: {language: newContent.language, text: newContent.text }
                         }
@@ -75,10 +78,6 @@ exports.updateProject = async (req, res, next) => {
             }
         })
         .catch(error => res.status(400).json({ error }));
-
-    // Project.findOneAndUpdate({_id: req.params.id}, { ...projectObject })
-    //     .then(() =>  res.status(201).json({ message: 'Projet modifié !'}))
-    //     .catch(error => res.status(400).json({ error }));
 }
 
 //Delete one project
