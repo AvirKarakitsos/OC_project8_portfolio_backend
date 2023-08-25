@@ -20,6 +20,7 @@ exports.getOneProject = (req, res, next) => {
 exports.createProject = async (req,res,next) => {
     try {
         let projectObject = JSON.parse(req.body.project);
+        console.log(projectObject)
         let name = req.file.originalname.split(' ').join('_'); //Construct a new name for the image
         let nameComplete = Date.now() + name;                  //with a unique name
         let image = sharp(req.file.buffer)
@@ -44,10 +45,40 @@ exports.createProject = async (req,res,next) => {
 //Modify a project
 exports.updateProject = async (req, res, next) => {
     let projectObject = { ...req.body }
+    let newContent = {
+        language: req.body.content[0].language,
+        text: req.body.content[0].text
+    }
 
-    Project.findOneAndUpdate({_id: req.params.id}, { ...projectObject })
-        .then(() =>  res.status(201).json({ message: 'Projet modifié !'}))
+    Project.findOne({_id: req.params.id})
+        .then(project => {
+            if (project.content.some((input) => input.language === newContent.language)) {
+                console.log("boucle 1")
+                Project.updateOne({_id: req.params.id, 'content.language': newContent.language},
+                    {
+                        $set: {
+                            'content.$.text' : newContent.text
+                        }
+                    })
+                    .then(() =>  res.status(201).json({ message: 'Projet modifié !'}))
+                    .catch(error => res.status(400).json({ error }));
+            } else {
+                console.log("boucle 2")
+                Project.updateOne({_id: req.params.id},
+                    {
+                        $push: {
+                            content: {language: newContent.language, text: newContent.text }
+                        }
+                    })
+                    .then(() =>  res.status(201).json({ message: 'Projet modifié !'}))
+                    .catch(error => res.status(400).json({ error }));
+            }
+        })
         .catch(error => res.status(400).json({ error }));
+
+    // Project.findOneAndUpdate({_id: req.params.id}, { ...projectObject })
+    //     .then(() =>  res.status(201).json({ message: 'Projet modifié !'}))
+    //     .catch(error => res.status(400).json({ error }));
 }
 
 //Delete one project
