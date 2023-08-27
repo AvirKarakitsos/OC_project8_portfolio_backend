@@ -20,10 +20,11 @@ exports.getOneProject = (req, res, next) => {
 exports.createProject = async (req,res,next) => {
     try {
         let projectObject = JSON.parse(req.body.project);
-        console.log(projectObject)
         let name = req.file.originalname.split(' ').join('_'); //Construct a new name for the image
         let nameComplete = Date.now() + name;                  //with a unique name
-        let image = sharp(req.file.buffer)
+        let image = sharp(req.file.buffer);
+
+        delete projectObject.userId;
 
         //Stock image and image resize with a width of 450px
         await image.toFile(`./images/${nameComplete}`)
@@ -32,6 +33,7 @@ exports.createProject = async (req,res,next) => {
         //Create a new project
         let project = new Project({
             ...projectObject,
+            userId: req.auth.userId,
             imageUrl: `${req.protocol}://${req.get('host')}/images/${nameComplete}`
         });
         project.save()
@@ -54,27 +56,31 @@ exports.updateProject = async (req, res, next) => {
 
     Project.findOne({_id: req.params.id})
         .then(project => {
-            if (project.content.some((input) => input.language === newContent.language)) {
-                Project.updateOne({_id: req.params.id, 'content.language': newContent.language},
-                    {
-                        ...projectObject,
-                        $set: {
-                            'content.$.text' : newContent.text
-                        }
-                    },
-                    )
-                    .then(() =>  res.status(201).json({ message: 'Projet modifié !'}))
-                    .catch(error => res.status(400).json({ error }));
+            if (project.userId !== req.auth.userId) {
+                res.status(403).json({ message : 'unauthorized request'});
             } else {
-                Project.updateOne({_id: req.params.id},
-                    {
-                        ...projectObject,
-                        $push: {
-                            content: {language: newContent.language, text: newContent.text }
-                        }
-                    })
-                    .then(() =>  res.status(201).json({ message: 'Projet modifié !'}))
-                    .catch(error => res.status(400).json({ error }));
+                if (project.content.some((input) => input.language === newContent.language)) {
+                    Project.updateOne({_id: req.params.id, 'content.language': newContent.language},
+                        {
+                            ...projectObject,
+                            $set: {
+                                'content.$.text' : newContent.text
+                            }
+                        },
+                        )
+                        .then(() =>  res.status(201).json({ message: 'Projet modifié !'}))
+                        .catch(error => res.status(400).json({ error }));
+                } else {
+                    Project.updateOne({_id: req.params.id},
+                        {
+                            ...projectObject,
+                            $push: {
+                                content: {language: newContent.language, text: newContent.text }
+                            }
+                        })
+                        .then(() =>  res.status(201).json({ message: 'Projet modifié !'}))
+                        .catch(error => res.status(400).json({ error }));
+                }
             }
         })
         .catch(error => res.status(400).json({ error }));
@@ -84,14 +90,20 @@ exports.updateProject = async (req, res, next) => {
 exports.deleteProject = (req, res, next) => {
     Project.findOne({ _id: req.params.id})
     .then(project => {
-        let filename = project.imageUrl.split('/images/')[1];
-        fs.unlink(`images/${filename}`, () => {
-            fs.unlink(`images/small/${filename}`, () => {
-                Project.deleteOne({_id: req.params.id})
-                .then(() => { res.status(200).json({message: 'Livre supprimé !'})})
-                .catch(error => res.status(401).json({ error }));
+        console.log(project.userId)
+        console.log(req.auth.userId)
+        if (project.userId !== req.auth.userId) {
+            res.status(403).json({message: 'unauthorized request'});
+        } else {
+            let filename = project.imageUrl.split('/images/')[1];
+            fs.unlink(`images/${filename}`, () => {
+                fs.unlink(`images/small/${filename}`, () => {
+                    Project.deleteOne({_id: req.params.id})
+                    .then(() => { res.status(200).json({message: 'Projet supprimé !'})})
+                    .catch(error => res.status(401).json({ error }));
+                })
             })
-        })
+        }
     })
     .catch( error => res.status(500).json({ error }));
  };
