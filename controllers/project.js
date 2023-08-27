@@ -53,6 +53,7 @@ exports.updateProject = async (req, res, next) => {
     }
 
     delete projectObject.content
+    delete projectObject.userId;
 
     Project.findOne({_id: req.params.id})
         .then(project => {
@@ -63,6 +64,7 @@ exports.updateProject = async (req, res, next) => {
                     Project.updateOne({_id: req.params.id, 'content.language': newContent.language},
                         {
                             ...projectObject,
+                            id: req.params.id,
                             $set: {
                                 'content.$.text' : newContent.text
                             }
@@ -74,6 +76,7 @@ exports.updateProject = async (req, res, next) => {
                     Project.updateOne({_id: req.params.id},
                         {
                             ...projectObject,
+                            id: req.params.id,
                             $push: {
                                 content: {language: newContent.language, text: newContent.text }
                             }
@@ -90,8 +93,6 @@ exports.updateProject = async (req, res, next) => {
 exports.deleteProject = (req, res, next) => {
     Project.findOne({ _id: req.params.id})
     .then(project => {
-        console.log(project.userId)
-        console.log(req.auth.userId)
         if (project.userId !== req.auth.userId) {
             res.status(403).json({message: 'unauthorized request'});
         } else {
