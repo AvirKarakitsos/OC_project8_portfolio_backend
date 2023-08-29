@@ -64,6 +64,7 @@ exports.updateProject = async (req, res, next) => {
                     Project.updateOne({_id: req.params.id, 'content.language': newContent.language},
                         {
                             ...projectObject,
+                            userId: req.auth.userId,
                             id: req.params.id,
                             $set: {
                                 'content.$.text' : newContent.text
@@ -76,6 +77,7 @@ exports.updateProject = async (req, res, next) => {
                     Project.updateOne({_id: req.params.id},
                         {
                             ...projectObject,
+                            userId: req.auth.userId,
                             id: req.params.id,
                             $push: {
                                 content: {language: newContent.language, text: newContent.text }
