@@ -1,6 +1,7 @@
 const express = require('express');
 const projectRoutes = require('./routes/project');
 const userRoutes = require('./routes/user');
+const skillRoutes = require('./routes/skill');
 const path = require('path');
 require('dotenv').config();
 
@@ -18,6 +19,7 @@ app.use((req, res, next) => {
 });
 
 //Define routes
+app.use('/api/skills',skillRoutes);
 app.use('/api/projects',projectRoutes);
 app.use('/api/auth',userRoutes);
 app.use('/images', express.static(path.join(__dirname, 'images')));
