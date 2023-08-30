@@ -25,7 +25,7 @@ exports.createSkill = async (req,res,next) => {
 //Modify a skill
 exports.updateSkill = async (req, res, next) => {
     let newSkill = {...req.body}
-
+   
     delete newSkill.userId
 
     Skill.findOne({_id: req.params.id})
@@ -40,7 +40,7 @@ exports.updateSkill = async (req, res, next) => {
                     id: req.params.id,
                 }
             )
-            .then(() => res.status(201).json({ message: 'Compétence enregistré !'}))
+            .then(() => res.status(201).json({ message: 'Compétence modifié !'}))
             .catch(error => res.status(400).json({ error }));
         }
     })
