@@ -19,26 +19,33 @@ exports.getOneProject = (req, res, next) => {
 //Post a project
 exports.createProject = async (req,res,next) => {
     try {
-        let projectObject = JSON.parse(req.body.project);
-        let name = req.file.originalname.split(' ').join('_'); //Construct a new name for the image
-        let nameComplete = Date.now() + name;                  //with a unique name
-        let image = sharp(req.file.buffer);
+        console.log("post controller")
+        // let projectObject = JSON.parse(req.body.project);
+        // let imageName = req.file.image[0].originalname.split(' ').join('_'); //Construct a new name for the image
+        // let videoName = req.file.video[0].originalname.split(' ').join('_'); //Construct a new name for the video
+        // let completeNameImage = Date.now() + imageName;                  //with a unique name
+        // let completeNameVideo = Date.now() + videoName;
 
-        delete projectObject.userId;
+        // let image = sharp(req.files.image[0].buffer);
+        // //let video = sharp(req.files.video[0].buffer);
 
-        //Stock image and image resize with a width of 450px
-        await image.toFile(`./images/${nameComplete}`)
-        await image.resize(450,null).toFile(`./images/small/${nameComplete}`)
+        // delete projectObject.userId;
+
+        // //Stock image, image resized with a width of 450px and video
+        // await image.toFile(`./images/${completeNameImage}`)
+        // await image.resize(450,null).toFile(`./images/small/${completeNameImage}`)
+        // //await video.toFile(`./videos/${completeNameVideo}`)
     
-        //Create a new project
-        let project = new Project({
-            ...projectObject,
-            userId: req.auth.userId,
-            imageUrl: `${req.protocol}://${req.get('host')}/images/${nameComplete}`
-        });
-        project.save()
-        .then(() => res.status(201).json({ message: 'Projet enregistré !'}))
-        .catch(error => res.status(400).json({ error }));
+        // //Create a new project
+        // let project = new Project({
+        //     ...projectObject,
+        //     userId: req.auth.userId,
+        //     videoUrl: `${req.protocol}://${req.get('host')}/videos/${completeNameImage}`,
+        //     imageUrl: `${req.protocol}://${req.get('host')}/images/${completeNameVideo}`
+        // });
+        // project.save()
+        //.then(() => res.status(201).json({ message: 'Projet enregistré !'}))
+        //.catch(error => res.status(400).json({ error }));
     } catch(error) {
         console.log(error.message)
     }

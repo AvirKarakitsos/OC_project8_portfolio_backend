@@ -8,9 +8,9 @@ const router = express.Router();
 router.get('/',projectController.getAllProjects);
 router.get('/:id',auth,projectController.getOneProject);
 
-router.post('/',auth,multer,projectController.createProject);
+router.post('/',auth,multer.imageUpload,projectController.createProject);
 
-router.put('/:id',auth,multer,projectController.updateProject);
+router.put('/:id',auth,multer.imageUpload,projectController.updateProject);
 
 router.delete('/:id',auth,projectController.deleteProject);
 

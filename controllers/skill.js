@@ -54,7 +54,7 @@ exports.deleteSkill = (req, res, next) => {
         if (skill.userId !== req.auth.userId) {
             res.status(403).json({message: 'unauthorized request'});
         } else {
-            Project.deleteOne({_id: req.params.id})
+            Skill.deleteOne({_id: req.params.id})
             .then(() => { res.status(200).json({message: 'Compétence supprimé !'})})
             .catch(error => res.status(401).json({ error }));
         }

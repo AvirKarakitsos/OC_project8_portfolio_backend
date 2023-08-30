@@ -23,5 +23,6 @@ app.use('/api/skills',skillRoutes);
 app.use('/api/projects',projectRoutes);
 app.use('/api/auth',userRoutes);
 app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/videos', express.static(path.join(__dirname, 'videos')));
 
 module.exports = app;
