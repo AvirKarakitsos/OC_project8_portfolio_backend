@@ -18,7 +18,7 @@ exports.createSkill = async (req,res,next) => {
         ...newSkill
     })
     skill.save()
-    .then(() => res.status(201).json({ message: 'Compétence enregistré !'}))
+    .then(() => res.status(201).json({ message: 'Compétence enregistrée'}))
     .catch(error => res.status(400).json({ error }));
 }
 
@@ -40,7 +40,7 @@ exports.updateSkill = async (req, res, next) => {
                     id: req.params.id,
                 }
             )
-            .then(() => res.status(201).json({ message: 'Compétence modifié !'}))
+            .then(() => res.status(201).json({ message: 'Compétence modifiée'}))
             .catch(error => res.status(400).json({ error }));
         }
     })
@@ -55,7 +55,7 @@ exports.deleteSkill = (req, res, next) => {
             res.status(403).json({message: 'unauthorized request'});
         } else {
             Skill.deleteOne({_id: req.params.id})
-            .then(() => { res.status(200).json({message: 'Compétence supprimé !'})})
+            .then(() => { res.status(200).json({message: 'Compétence supprimée'})})
             .catch(error => res.status(401).json({ error }));
         }
     })

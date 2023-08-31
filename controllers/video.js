@@ -15,7 +15,7 @@ exports.createVideo = async (req,res,next) => {
 
     let video = new Video({
         userId: req.auth.userId,
-        imageUrl: `${req.protocol}://${req.get('host')}/videos/${req.file.filename}`,
+        videoUrl: `${req.protocol}://${req.get('host')}/videos/${req.file.filename}`,
         ...newVideo
     })
     video.save()
