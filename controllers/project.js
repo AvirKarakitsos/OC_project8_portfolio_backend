@@ -20,15 +20,20 @@ exports.getOneProject = (req, res, next) => {
 exports.createProject = async (req,res,next) => {
     try {
         let projectObject = JSON.parse(req.body.project);
+        let name = file.originalname.split(' ').join('_'); //Construct a new name for the file
+        let completeName = Date.now() + name;
+        let image = sharp(req.file.buffer)
 
         delete projectObject.userId;
+
+        await image.toFile(`./images/${nameComplete}`)
+        await image.resize(450,null).toFile(`./images/${nameComplete}`)
 
         //Create a new project
         let project = new Project({
             ...projectObject,
             userId: req.auth.userId,
-            videoUrl: `${req.protocol}://${req.get('host')}/videos/${req.files.video[0].filename}`,
-            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.files.image[0].filename}`
+            imageUrl: `${req.protocol}://${req.get('host')}/images/${completeName}`
         });
         project.save()
         .then(() => res.status(201).json({ message: 'Projet enregistré !'}))

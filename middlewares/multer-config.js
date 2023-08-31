@@ -1,9 +1,9 @@
 const multer = require('multer');
 
-const videoStorage = multer.diskStorage({
-	
+const imageStorage = multer.memoryStorage()
+
+const videoStorage = multer.diskStorage({	
 	destination: (req, file, callback) => {
-		//callback(null, 'videos');
 		if (file.mimetype === "video/mp4") {
 			callback(null, 'videos');
 		} else {
@@ -17,10 +17,7 @@ const videoStorage = multer.diskStorage({
 	}
 });
 
-module.exports = multer({storage: videoStorage}).fields(
-	[{
-       name: 'image', maxCount: 1
-    }, 
-	{
-       name: 'video', maxCount: 1
-    }]);
+module.exports = {
+	imageUpload: multer({storage: imageStorage}).single("image"),
+	videoUpload: multer({storage: videoStorage}).single('video')
+} 
