@@ -1,15 +1,15 @@
 const express = require('express')
-const skillController = require('../controllers/skill');
+const videoController = require('../controllers/video');
 const auth = require('../middlewares/auth');
-
+const multer = require('../middlewares/multer-config')
 const router = express.Router();
 
-router.get('/',skillController.getAllSkills);
+router.get('/',videoController.getAllVideos);
 
-router.post('/',auth,skillController.createSkill);
+router.post('/',auth,multer.videoUpload,videoController.createVideo);
 
-router.put('/:id',auth,skillController.updateSkill);
+router.put('/:id',auth,multer.videoUpload,videoController.updateVideo);
 
-router.delete('/:id',auth,skillController.deleteSkill);
+router.delete('/:id',auth,videoController.deleteVideo);
 
 module.exports = router;

@@ -9,22 +9,23 @@ exports.getAllVideos = (req, res, next) => {
 
 //Post a video
 exports.createVideo = async (req,res,next) => {
-    let newVideo = {...req.body}
+    let newVideo = JSON.parse(req.body.content);
 
     delete newVideo.userId
 
     let video = new Video({
         userId: req.auth.userId,
+        imageUrl: `${req.protocol}://${req.get('host')}/videos/${req.file.filename}`,
         ...newVideo
     })
     video.save()
-    .then(() => res.status(201).json({ message: 'Compétence enregistré !'}))
+    .then(() => res.status(201).json({ message: 'Vidéo enregistrée'}))
     .catch(error => res.status(400).json({ error }));
 }
 
 //Modify a video
 exports.updateVideo = async (req, res, next) => {
-    let newVideo = {...req.body}
+    let newVideo = JSON.parse(req.body.content);
    
     delete newVideo.userId
 
@@ -40,7 +41,7 @@ exports.updateVideo = async (req, res, next) => {
                     id: req.params.id,
                 }
             )
-            .then(() => res.status(201).json({ message: 'Compétence modifié !'}))
+            .then(() => res.status(201).json({ message: 'Vidéo enregistrée'}))
             .catch(error => res.status(400).json({ error }));
         }
     })

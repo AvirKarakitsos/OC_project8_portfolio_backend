@@ -3,12 +3,8 @@ const multer = require('multer');
 const imageStorage = multer.memoryStorage()
 
 const videoStorage = multer.diskStorage({	
-	destination: (req, file, callback) => {
-		if (file.mimetype === "video/mp4") {
-			callback(null, 'videos');
-		} else {
-			callback(null, 'images');
-		}
+	destination: (req, file, callback) => {	
+		callback(null, 'videos');
 	},
 	filename: (req, file, callback) => {
 		let name = file.originalname.split(' ').join('_'); //Construct a new name for the file
