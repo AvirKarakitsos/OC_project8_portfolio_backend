@@ -27,7 +27,7 @@ exports.createProject = async (req,res,next) => {
         delete projectObject.userId;
 
         await image.toFile(`./images/${nameComplete}`)
-        await image.resize(450,null).toFile(`./images/${nameComplete}`)
+        await image.resize(450,null).toFile(`./images/small/${nameComplete}`)
 
         //Create a new project
         let project = new Project({
