@@ -1,13 +1,14 @@
 const express = require('express')
+const contentController = require('../controllers/content');
 const auth = require('../middlewares/auth');
 const router = express.Router();
 
-router.get('/',videoController.getAllContents);
+router.get('/',contentController.getAllContents);
 
-router.post('/',auth,multer.videoUpload,videoController.createContent);
+router.post('/',auth,contentController.createContent);
 
-router.put('/:id',auth,multer.videoUpload,videoController.updateContent);
+router.put('/:id',auth,contentController.updateContent);
 
-router.delete('/:id',auth,videoController.deleteContent);
+router.delete('/:id',auth,contentController.deleteContent);
 
 module.exports = router;
