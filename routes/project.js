@@ -7,7 +7,8 @@ const router = express.Router();
 
 router.get('/',projectController.getAllProjects);
 router.get('/:id',auth,projectController.getOneProject);
-router.get('/:id/color',auth,projectController.getColor);
+router.get('/:id/category',projectController.getCategory);
+router.get('/:id/video',projectController.getVideo);
 
 router.post('/',auth,multer.imageUpload,projectController.createProject);
 

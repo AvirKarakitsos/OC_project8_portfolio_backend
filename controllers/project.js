@@ -1,5 +1,6 @@
 const Project = require('../models/Project');
 const Category = require('../models/Category');
+const Video = require('../models/Video');
 const fs = require('fs');
 const sharp = require('sharp');
 
@@ -18,13 +19,26 @@ exports.getOneProject = (req, res, next) => {
 }
 
 //Get the color bookmark of a project
-exports.getColor = (req, res, next) => {
+exports.getCategory = (req, res, next) => {
     Project.findOne({_id: req.params.id})
     .then(project => {
         Category.find() 
         .then(categories => {
             let colorProject = categories.filter( category => category.key === project.type)
             res.status(200).json(colorProject)
+        })
+        .catch(error => res.status(404).json({ error }));
+    })
+    .catch(error => res.status(400).json({ error }));
+}
+
+exports.getVideo = (req, res, next) => {
+    Project.findOne({_id: req.params.id})
+    .then(project => {
+        Video.find()
+        .then(videos => {
+            let videoProject = videos.filter( video => video.projectId === project._id)
+            res.status(200).json(videoProject)
         })
         .catch(error => res.status(404).json({ error }));
     })
