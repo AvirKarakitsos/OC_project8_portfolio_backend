@@ -1,4 +1,5 @@
 const Project = require('../models/Project');
+const Category = require('../models/Category');
 const fs = require('fs');
 const sharp = require('sharp');
 
@@ -14,6 +15,20 @@ exports.getOneProject = (req, res, next) => {
     Project.findOne({_id: req.params.id})
     .then(project => res.status(200).json(project))
     .catch(error => res.status(404).json({ error }));
+}
+
+//Get the color bookmark of a project
+exports.getColor = (req, res, next) => {
+    Project.findOne({_id: req.params.id})
+    .then(project => {
+        Category.find() 
+        .then(categories => {
+            let colorProject = categories.filter( category => category.key === project.type)
+            res.status(200).json(colorProject)
+        })
+        .catch(error => res.status(404).json({ error }));
+    })
+    .catch(error => res.status(400).json({ error }));
 }
 
 //Post a project
