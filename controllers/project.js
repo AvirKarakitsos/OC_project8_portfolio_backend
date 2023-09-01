@@ -37,7 +37,7 @@ exports.getVideo = (req, res, next) => {
     .then(project => {
         Video.find()
         .then(videos => {
-            let videoProject = videos.filter( video => video.projectId === project._id)
+            let videoProject = videos.filter( video => video.projectId === project._id.toString() )
             res.status(200).json(videoProject)
         })
         .catch(error => res.status(404).json({ error }));
