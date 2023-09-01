@@ -37,7 +37,7 @@ exports.updateContent = async (req, res, next) => {
                 {
                     ...newContent,
                     userId: req.auth.userId,
-                    id: req.params.id,
+                    _id: req.params.id,
                 }
             )
             .then(() => res.status(201).json({ message: 'Contenu modifié'}))

@@ -37,7 +37,7 @@ exports.updateSkill = async (req, res, next) => {
                 {
                     ...newSkill,
                     userId: req.auth.userId,
-                    id: req.params.id,
+                    _id: req.params.id,
                 }
             )
             .then(() => res.status(201).json({ message: 'Compétence modifiée'}))

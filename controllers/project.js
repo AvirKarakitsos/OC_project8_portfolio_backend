@@ -64,7 +64,7 @@ exports.updateProject = async (req, res, next) => {
                         {
                             ...projectObject,
                             userId: req.auth.userId,
-                            id: req.params.id,
+                            _id: req.params.id,
                             $set: {
                                 'content.$.text' : newContent.text
                             }

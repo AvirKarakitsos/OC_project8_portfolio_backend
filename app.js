@@ -4,6 +4,7 @@ const userRoutes = require('./routes/user');
 const skillRoutes = require('./routes/skill');
 const videoRoutes = require('./routes/video')
 const contentRoutes = require('./routes/content')
+const categoryRoute = require('./routes/category')
 
 const path = require('path');
 require('dotenv').config();
@@ -22,10 +23,11 @@ app.use((req, res, next) => {
 });
 
 //Define routes
-app.use('/api/videos',videoRoutes);
+app.use('/api/contents',contentRoutes);
 app.use('/api/skills',skillRoutes);
 app.use('/api/projects',projectRoutes);
-app.use('/api/contents',contentRoutes);
+app.use('/api/categories/',categoryRoute);
+app.use('/api/videos',videoRoutes);
 app.use('/api/auth',userRoutes);
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
