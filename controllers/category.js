@@ -27,7 +27,9 @@ exports.createCategory = async (req,res,next) => {
 //Modify a category
 exports.updateCategory = async (req, res, next) => {
     let newCategory = {...req.body}
-   
+    let word = newCategory.english
+    let key = word.split(" ").join("")
+
     delete newCategory.userId
 
     Category.findOne({_id: req.params.id})
@@ -38,6 +40,7 @@ exports.updateCategory = async (req, res, next) => {
             Category.updateOne({_id: req.params.id},
                 {
                     ...newCategory,
+                    key: key.toLowerCase(),
                     userId: req.auth.userId,
                     _id: req.params.id,
                 }
