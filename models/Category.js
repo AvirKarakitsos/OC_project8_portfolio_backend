@@ -5,6 +5,7 @@ const categorySchema = mongoose.Schema({
   french: { type: String, required: true },
   english: { type: String, required: true },
   color: { type: String, required: true },
+  key: { type: String, required: true },
   edit: { type: Boolean, default: false}
 });
 

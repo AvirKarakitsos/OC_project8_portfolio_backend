@@ -10,11 +10,13 @@ exports.getAllCategorys = (req, res, next) => {
 //Post a category
 exports.createCategory = async (req,res,next) => {
     let newCategory = {...req.body}
-
+    let word = newCategory.english
+    let key = word.split(" ").join("")
     delete newCategory.userId
 
     let category = new Category({
         userId: req.auth.userId,
+        key: key.toLowerCase(),
         ...newCategory
     })
     category.save()
