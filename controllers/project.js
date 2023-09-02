@@ -24,7 +24,7 @@ exports.getCategory = (req, res, next) => {
     .then(project => {
         Category.find() 
         .then(categories => {
-            let colorProject = categories.filter( category => category.key === project.type)
+            let colorProject = categories.filter( category => category.key === project.category)
             res.status(200).json(colorProject)
         })
         .catch(error => res.status(404).json({ error }));

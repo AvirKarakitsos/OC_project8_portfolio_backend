@@ -7,7 +7,7 @@ const projectSchema = mongoose.Schema({
 	tags: { type: String, required: true },
 	content: [{  _id: false, language: String, text: String }],
 	link: { type: String, required: true },
-	type: { type: String, required: true }
+	category: { type: String, required: true }
 },
 { timestamps: true });
 
