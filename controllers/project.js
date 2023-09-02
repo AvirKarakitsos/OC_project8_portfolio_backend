@@ -49,14 +49,14 @@ exports.getVideo = (req, res, next) => {
 exports.createProject = async (req,res,next) => {
     try {
         let projectObject = JSON.parse(req.body.project);
-        let name = file.originalname.split(' ').join('_'); //Construct a new name for the file
+        let name = req.file.originalname.split(' ').join('_'); //Construct a new name for the file
         let completeName = Date.now() + name;
         let image = sharp(req.file.buffer)
 
         delete projectObject.userId;
 
-        await image.toFile(`./images/${nameComplete}`)
-        await image.resize(450,null).toFile(`./images/small/${nameComplete}`)
+        await image.toFile(`./images/${completeName}`)
+        await image.resize(450,null).toFile(`./images/small/${completeName}`)
 
         //Create a new project
         let project = new Project({
