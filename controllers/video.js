@@ -1,4 +1,5 @@
 const Video = require('../models/Video')
+const fs = require('fs')
 
 //Get all videos
 exports.getAllVideos = (req, res, next) => {
@@ -26,23 +27,26 @@ exports.createVideo = async (req,res,next) => {
 //Modify a video
 exports.updateVideo = async (req, res, next) => {
     let newVideo = JSON.parse(req.body.content);
-   
+    
     delete newVideo.userId
 
-    Video.findOne({_id: req.params.id})
+    Video.findOne({projectId: req.params.id})
     .then(video => {
         if (video.userId !== req.auth.userId) {
             res.status(403).json({ message : 'unauthorized request'});
         } else {
-            Video.updateOne({_id: req.params.id},
-                {
-                    ...newVideo,
-                    userId: req.auth.userId,
-                    _id: req.params.id,
-                }
-            )
-            .then(() => res.status(201).json({ message: 'Vidéo enregistrée'}))
-            .catch(error => res.status(400).json({ error }));
+            let filename = video.videoUrl.split('/videos/')[1]
+            fs.unlink(`videos/${filename}`, () => {
+                Video.updateOne({projectId: req.params.id},
+                    {
+                        ...newVideo,
+                        videoUrl:  `${req.protocol}://${req.get('host')}/videos/${req.file.filename}`,
+                        userId: req.auth.userId,
+                    }
+                )
+                .then(() => res.status(201).json({ message: 'Vidéo enregistrée'}))
+                .catch(error => res.status(400).json({ error }));
+            })
         }
     })
     .catch(error => res.status(400).json({ error }));
@@ -50,16 +54,18 @@ exports.updateVideo = async (req, res, next) => {
 
 //Delete one video
 exports.deleteVideo = (req, res, next) => {
-    Video.findOne({ _id: req.params.id})
+    Video.findOne({ projectId: req.params.id})
     .then(video => {
         if (video.userId !== req.auth.userId) {
             res.status(403).json({message: 'unauthorized request'});
         } else {
-            Video.deleteOne({_id: req.params.id})
-            .then(() => { res.status(200).json({message: 'Compétence supprimé !'})})
-            .catch(error => res.status(401).json({ error }));
+            let filename = video.videoUrl.split('/videos/')[1]
+            fs.unlink(`videos/${filename}`, () => {
+                Video.deleteOne({projectId: req.params.id})
+                .then(() => { res.status(200).json({message: 'Vidéo supprimée'})})
+                .catch(error => res.status(401).json({ error }));
+            })
         }
     })
     .catch( error => res.status(500).json({ error }));
-    
  };
