@@ -74,10 +74,30 @@ exports.createProject = async (req,res,next) => {
 
 //Modify a project
 exports.updateProject = async (req, res, next) => {
-    let projectObject = { ...req.body }
-    let newContent = {
-        language: req.body.content[0].language,
-        text: req.body.content[0].text
+    let projectObject = null
+    let newContent = null
+
+    if(req.file) {
+        let name = req.file.originalname.split(' ').join('_'); //Construct a new name for the file
+        let completeName = Date.now() + name;
+        let image = sharp(req.file.buffer)
+        
+        projectObject = {
+            ...JSON.parse(req.body.project),
+            imageUrl: `${req.protocol}://${req.get('host')}/images/${completeName}`
+        }
+        newContent = {
+            language: projectObject.content[0].language,
+            text: projectObject.content[0].text
+        }
+        await image.toFile(`./images/${completeName}`)
+        await image.resize(450,null).toFile(`./images/small/${completeName}`)
+    } else {
+        projectObject = { ...req.body }
+        newContent = {
+            language: req.body.content[0].language,
+            text: req.body.content[0].text
+        }
     }
 
     delete projectObject.content
@@ -99,7 +119,7 @@ exports.updateProject = async (req, res, next) => {
                             }
                         },
                         )
-                        .then(() =>  res.status(201).json({ message: 'Projet modifié !'}))
+                        .then(() =>  res.status(201).json({ message: 'Projet modifié'}))
                         .catch(error => res.status(400).json({ error }));
                 } else {
                     Project.updateOne({_id: req.params.id},
@@ -111,7 +131,7 @@ exports.updateProject = async (req, res, next) => {
                                 content: {language: newContent.language, text: newContent.text }
                             }
                         })
-                        .then(() =>  res.status(201).json({ message: 'Projet modifié !'}))
+                        .then(() =>  res.status(201).json({ message: 'Projet modifié'}))
                         .catch(error => res.status(400).json({ error }));
                 }
             }
@@ -130,7 +150,7 @@ exports.deleteProject = (req, res, next) => {
             fs.unlink(`images/${filename}`, () => {
                 fs.unlink(`images/small/${filename}`, () => {
                     Project.deleteOne({_id: req.params.id})
-                    .then(() => { res.status(200).json({message: 'Projet supprimé !'})})
+                    .then(() => { res.status(200).json({message: 'Projet supprimé'})})
                     .catch(error => res.status(401).json({ error }));
                 })
             })
