@@ -1,14 +1,16 @@
 const jwt = require('jsonwebtoken')
+const fs= require('fs')
  
 //Decode the token comming from the frontend
 module.exports = (req, res, next) => {
    try {
-       const token = req.headers.authorization.split(' ')[1] //["bearer","token"]
-       const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET')
-       const userId = decodedToken.userId
-       req.auth = {
-           userId: userId
-       }
+        let secret = fs.readFileSync('./middlewares/folder/.certs/two.pem') 
+        const token = req.headers.authorization.split(' ')[1] //["bearer","token"]
+        const decodedToken = jwt.verify(token, secret)
+        const userId = decodedToken.userId
+        req.auth = {
+            userId: userId
+        }
 	next()
    } catch(error) {
        res.status(401).json({ error })

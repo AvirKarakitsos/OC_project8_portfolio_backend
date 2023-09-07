@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require("../models/User")
+const fs = require('fs')
 
 //Post to register a user
 exports.signup = (req, res, next) => {
@@ -29,12 +30,13 @@ exports.login = (req, res, next) => {
 				if (!valid) {
 						return res.status(401).json({ message: 'Paire login/mot de passe incorrecte' })
 				}
+				let secret = fs.readFileSync('./middlewares/folder/.certs/one.pem')
 				res.status(200).json({
 						userId: user._id,
 						token: jwt.sign(
 							{ userId: user._id },
-							'RANDOM_TOKEN_SECRET',
-							{ expiresIn: '24h' }
+							secret,
+							{ expiresIn: '24h', algorithm: 'RS256' }
 						)
 				})
 		})
