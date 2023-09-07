@@ -4,7 +4,7 @@ const Skill = require('../models/Skill')
 exports.getAllSkills = (req, res, next) => {
     Skill.find()
     .then(skills => res.status(200).json(skills))
-    .catch(error => res.status(400).json({ error }));
+    .catch(error => res.status(400).json({ error }))
 }
 
 //Post a skill
@@ -19,7 +19,7 @@ exports.createSkill = async (req,res,next) => {
     })
     skill.save()
     .then(() => res.status(201).json({ message: 'Compétence enregistrée'}))
-    .catch(error => res.status(400).json({ error }));
+    .catch(error => res.status(400).json({ error }))
 }
 
 //Modify a skill
@@ -31,7 +31,7 @@ exports.updateSkill = async (req, res, next) => {
     Skill.findOne({_id: req.params.id})
     .then(skill => {
         if (skill.userId !== req.auth.userId) {
-            res.status(403).json({ message : 'unauthorized request'});
+            res.status(403).json({ message : 'unauthorized request'})
         } else {
             Skill.updateOne({_id: req.params.id},
                 {
@@ -41,10 +41,10 @@ exports.updateSkill = async (req, res, next) => {
                 }
             )
             .then(() => res.status(201).json({ message: 'Compétence modifiée'}))
-            .catch(error => res.status(400).json({ error }));
+            .catch(error => res.status(400).json({ error }))
         }
     })
-    .catch(error => res.status(400).json({ error }));
+    .catch(error => res.status(400).json({ error }))
 }
 
 //Delete one skill
@@ -52,13 +52,13 @@ exports.deleteSkill = (req, res, next) => {
     Skill.findOne({ _id: req.params.id})
     .then(skill => {
         if (skill.userId !== req.auth.userId) {
-            res.status(403).json({message: 'unauthorized request'});
+            res.status(403).json({message: 'unauthorized request'})
         } else {
             Skill.deleteOne({_id: req.params.id})
             .then(() => { res.status(200).json({message: 'Compétence supprimée'})})
-            .catch(error => res.status(401).json({ error }));
+            .catch(error => res.status(401).json({ error }))
         }
     })
-    .catch( error => res.status(500).json({ error }));
+    .catch( error => res.status(500).json({ error }))
     
- };
+ }
