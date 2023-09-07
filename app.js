@@ -5,6 +5,9 @@ const skillRoutes = require('./routes/skill')
 const videoRoutes = require('./routes/video')
 const contentRoutes = require('./routes/content')
 const categoryRoute = require('./routes/category')
+const helmet = require('helmet')
+
+const permission = 'http://localhost:3000'
 
 const path = require('path')
 require('dotenv').config()
@@ -14,21 +17,29 @@ const app = express()
 //Intercept request with a json content-type
 app.use(express.json())
 
-//Solve CORS problems
+//Protect headers of requests
+app.disable('x-powered-by')
+app.use(helmet(
+    {
+        crossOriginResourcePolicy: {policy: "cross-origin"}
+    }
+))
+
+//CORS configuration
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+    res.setHeader('Access-Control-Allow-Origin', permission)
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization')
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
     next()
 })
 
 //Define routes
-app.use('/api/contents',contentRoutes)
-app.use('/api/skills',skillRoutes)
-app.use('/api/projects',projectRoutes)
-app.use('/api/categories/',categoryRoute)
-app.use('/api/videos',videoRoutes)
-app.use('/api/auth',userRoutes)
+app.use('/api/contents', contentRoutes)
+app.use('/api/skills', skillRoutes)
+app.use('/api/projects', projectRoutes)
+app.use('/api/categories/', categoryRoute)
+app.use('/api/videos', videoRoutes)
+app.use('/api/auth', userRoutes)
 
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use('/videos', express.static(path.join(__dirname, 'videos')))
