@@ -6,11 +6,13 @@ const videoRoutes = require('./routes/video')
 const contentRoutes = require('./routes/content')
 const categoryRoute = require('./routes/category')
 const helmet = require('helmet')
+require('dotenv').config()
 
-const permission = 'http://localhost:3000'
+
+//const permission = 'http://localhost:3000'
+const permission = 'https://arnocotsoyannis.onrender.com'
 
 const path = require('path')
-require('dotenv').config()
 
 const app = express()
 

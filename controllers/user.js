@@ -5,7 +5,7 @@ const fs = require('fs')
 
 //Post to register a user
 exports.signup = (req, res, next) => {
-	bcrypt.hash(req.body.password, 10)
+	bcrypt.hash(req.body.password, process.env.BCRYPT_ROUND)
 	.then(hash => {
 		const user = new User({
 			email: req.body.email,
@@ -36,7 +36,7 @@ exports.login = (req, res, next) => {
 						token: jwt.sign(
 							{ userId: user._id },
 							secret,
-							{ expiresIn: '24h', algorithm: 'RS256' }
+							{ expiresIn: process.env.JWT_DURING, algorithm: 'RS256' }
 						)
 				})
 		})
