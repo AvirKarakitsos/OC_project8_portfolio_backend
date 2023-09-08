@@ -16,9 +16,6 @@ const path = require('path')
 
 const app = express()
 
-//req.protocol
-app.set('trust proxy', 1);
-
 //Intercept request with a json content-type
 app.use(express.json())
 
