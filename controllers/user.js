@@ -5,12 +5,13 @@ const fs = require('fs')
 
 //Post to register a user
 exports.signup = (req, res, next) => {
-	bcrypt.hash(req.body.password, process.env.BCRYPT_ROUND)
+	bcrypt.hash(req.body.password, parseInt(process.env.BCRYPT_ROUND))
 	.then(hash => {
-		const user = new User({
+		let user = new User({
 			email: req.body.email,
 			password: hash
 		})
+		console.log(user)
 		user.save()
 			.then(() => res.status(201).json({ message: 'Utilisateur créé !' }))
 			.catch(error => res.status(400).json({ error }))
