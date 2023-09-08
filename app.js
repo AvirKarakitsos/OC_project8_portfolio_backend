@@ -6,6 +6,7 @@ const videoRoutes = require('./routes/video')
 const contentRoutes = require('./routes/content')
 const categoryRoute = require('./routes/category')
 const helmet = require('helmet')
+const fs = require('fs').promises
 require('dotenv').config()
 
 
@@ -46,4 +47,14 @@ app.use('/api/auth', userRoutes)
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use('/videos', express.static(path.join(__dirname, 'videos')))
 
+async function main() {
+    await findFiles("images")
+}
+
+main()
+
+async function findFiles(folderName) {
+    let storeFiles = await fs.readdir(folderName)
+    console.log(storeFiles)
+}
 module.exports = app
