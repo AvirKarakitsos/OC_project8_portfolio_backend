@@ -62,7 +62,7 @@ exports.createProject = async (req,res,next) => {
         let project = new Project({
             ...projectObject,
             userId: req.auth.userId,
-            imageUrl: `${req.protocol}://${req.get('host')}/images/${completeName}`
+            imageUrl: `https://${req.get('host')}/images/${completeName}`
         })
         project.save()
         .then(() => res.status(201).json({ message: 'Projet enregistré !'}))
