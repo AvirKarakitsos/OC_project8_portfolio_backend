@@ -3,18 +3,25 @@ const Category = require('../models/Category')
 const Video = require('../models/Video')
 const fs = require('fs')
 const sharp = require('sharp')
+const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3')
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
+
 
 //Get all projects
-exports.getAllProjects = (req, res, next) => {
-    Project.find()
-    .then(projects => res.status(200).json(projects))
-    .catch(error => res.status(400).json({ error }))
+exports.getAllProjects =  async (req, res, next) => {
+    try {
+        let projects = await Project.find()
+        res.status(200).json(projects)
+    
+    }catch(e) {
+        console.log(e)
+    }
 }
 
 //Get one project by its id
 exports.getOneProject = (req, res, next) => {
     Project.findOne({_id: req.params.id})
-    .then(project => res.status(200).json(project))
+    .then((project) => res.status(200).json(project) )
     .catch(error => res.status(404).json({ error }))
 }
 
@@ -50,19 +57,52 @@ exports.createProject = async (req,res,next) => {
     try {
         let projectObject = JSON.parse(req.body.project)
         let name = req.file.originalname.split(' ').join('_') //Construct a new name for the file
-        let completeName = Date.now() + name
+        let imageName = Date.now() + name
+        let smallImageName = "small-"+imageName
         let image = sharp(req.file.buffer)
 
         delete projectObject.userId
 
-        await image.toFile(`./images/${completeName}`)
-        await image.resize(450,null).toFile(`./images/small/${completeName}`)
+        const bucketName = process.env.BUCKET_NAME
+        const bucketRegion = process.env.BUCKET_REGION
+        const accessKey = process.env.ACCESS_KEY
+        const secretAccessKey = process.env.SECRET_ACCESS_KEY
+
+        const s3 = new S3Client({
+            credentials: {
+                accessKeyId: accessKey,
+                secretAccessKey: secretAccessKey,
+            },
+            region: bucketRegion
+        })
+        console.log(s3)
+
+        let params1 = {
+            Bucket: bucketName,
+            Key: imageName,
+            Body: req.file.buffer,
+            ContentType: req.file.mimetype
+        }
+
+        let smallImage = await image.resize(315,null).toBuffer()
+        let params2 = {
+            Bucket: bucketName,
+            Key: smallImageName,
+            Body: smallImage,
+            ContentType: req.file.mimetype
+        }
+
+        let command1 = new PutObjectCommand(params1)
+        let command2= new PutObjectCommand(params2)
+
+        await s3.send(command1)
+        await s3.send(command2)
 
         //Create a new project
         let project = new Project({
             ...projectObject,
             userId: req.auth.userId,
-            imageUrl: `https://${req.get('host')}/images/${completeName}`
+            imageUrl: `https://portfolio-ac-public.s3.eu-west-3.amazonaws.com/${imageName}`
         })
         project.save()
         .then(() => res.status(201).json({ message: 'Projet enregistré !'}))

@@ -11,7 +11,7 @@ require('dotenv').config()
 
 
 //const permission = 'http://localhost:3000'
-const permission = 'https://arnocotsoyannis.onrender.com'
+//const permission = 'https://arnocotsoyannis.onrender.com'
 
 const path = require('path')
 
@@ -30,7 +30,7 @@ app.use(helmet(
 
 //CORS configuration
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', permission)
+    res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization')
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
     next()
@@ -47,14 +47,4 @@ app.use('/api/auth', userRoutes)
 app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use('/videos', express.static(path.join(__dirname, 'videos')))
 
-async function main() {
-    await findFiles("images")
-}
-
-main()
-
-async function findFiles(folderName) {
-    let storeFiles = await fs.readdir(folderName)
-    console.log(storeFiles)
-}
 module.exports = app
