@@ -75,7 +75,6 @@ exports.createProject = async (req,res,next) => {
             },
             region: bucketRegion
         })
-        console.log(s3)
 
         let params1 = {
             Bucket: bucketName,

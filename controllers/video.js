@@ -15,9 +15,9 @@ exports.createVideo = async (req,res,next) => {
     delete newVideo.userId
 
     let video = new Video({
+        ...newVideo,
         userId: req.auth.userId,
-        videoUrl: `${req.protocol}://${req.get('host')}/videos/${req.file.filename}`,
-        ...newVideo
+        videoUrl: req.file.location
     })
     video.save()
     .then(() => res.status(201).json({ message: 'Vidéo enregistrée'}))
