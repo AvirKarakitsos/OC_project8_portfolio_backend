@@ -1,20 +1,15 @@
 const Project = require('../models/Project')
 const Category = require('../models/Category')
 const Video = require('../models/Video')
-const fs = require('fs')
 const sharp = require('sharp')
 const { PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3')
-const s3 = require('../config/connectionAws')
+const { s3, putOption, deleteOption} = require('../config/connectionAws')
 
 //Get all projects
 exports.getAllProjects =  async (req, res, next) => {
-    try {
-        let projects = await Project.find()
-        res.status(200).json(projects)
-    
-    }catch(e) {
-        console.log(e)
-    }
+    Project.find()
+    .then((projects) => res.status(200).json(projects) )    
+    .catch(error => res.status(500).json({error}))
 }
 
 //Get one project by its id
@@ -38,6 +33,8 @@ exports.getCategory = (req, res, next) => {
     .catch(error => res.status(400).json({ error }))
 }
 
+
+// Get the video of a project
 exports.getVideo = (req, res, next) => {
     Project.findOne({_id: req.params.id})
     .then(project => {
@@ -58,26 +55,14 @@ exports.createProject = async (req,res,next) => {
         let name = req.file.originalname.split(' ').join('_') //Construct a new name for the file
         let imageName = Date.now() + name
         let smallImageName = "small-"+imageName
+        
         let image = sharp(req.file.buffer)
+        let smallImage = await image.resize(315,null).toBuffer()
 
         delete projectObject.userId
 
-        let bucketName = process.env.BUCKET_NAME
-
-        let params1 = {
-            Bucket: bucketName,
-            Key: imageName,
-            Body: req.file.buffer,
-            ContentType: req.file.mimetype
-        }
-
-        let smallImage = await image.resize(315,null).toBuffer()
-        let params2 = {
-            Bucket: bucketName,
-            Key: smallImageName,
-            Body: smallImage,
-            ContentType: req.file.mimetype
-        }
+        let params1 = putOption(imageName,req.file.buffer,req.file.mimetype)
+        let params2 = putOption(smallImageName,smallImage,req.file.mimetype)
 
         let command1 = new PutObjectCommand(params1)
         let command2= new PutObjectCommand(params2)
@@ -96,6 +81,7 @@ exports.createProject = async (req,res,next) => {
         .catch(error => res.status(400).json({ error }))
     } catch(error) {
         console.log(error.message)
+        res.status(400).json({ error })
     }
 }
 
@@ -109,7 +95,9 @@ exports.updateProject = async (req, res, next) => {
         let name = req.file.originalname.split(' ').join('_') //Construct a new name for the file
         let imageName = Date.now() + name
         let smallImageName = "small-"+imageName
+        
         let image = sharp(req.file.buffer)
+        let smallImage = await image.resize(315,null).toBuffer()
 
         let oldName = project.imageUrl.split('.com/')[1]
 
@@ -123,31 +111,14 @@ exports.updateProject = async (req, res, next) => {
         }
         let bucketName = process.env.BUCKET_NAME
 
-        let params1 = {
-            Bucket: bucketName,
-            Key: imageName,
-            Body: req.file.buffer,
-            ContentType: req.file.mimetype
-        }
-
-        let smallImage = await image.resize(315,null).toBuffer()
-        let params2 = {
-            Bucket: bucketName,
-            Key: smallImageName,
-            Body: smallImage,
-            ContentType: req.file.mimetype
-        }
+        let params1 = putOption(imageName,req.file.buffer,req.file.mimetype)
+        let params2 = putOption(smallImageName,smallImage,req.file.mimetype)
 
         let command1 = new PutObjectCommand(params1)
         let command2= new PutObjectCommand(params2)
-        let delete1 = new DeleteObjectCommand({
-            Bucket: bucketName,
-            Key: oldName
-        })
-        let delete2 = new DeleteObjectCommand({
-            Bucket: bucketName,
-            Key: "small-"+oldName
-        })
+
+        let delete1 = new DeleteObjectCommand(deleteOption(oldName))
+        let delete2 = new DeleteObjectCommand(deleteOption(`small-${oldName}`))
 
         await s3.send(command1)
         await s3.send(command2)
@@ -206,24 +177,18 @@ exports.deleteProject = async (req, res, next) => {
             res.status(403).json({message: 'unauthorized request'})
         } else {
             let filename = project.imageUrl.split('.com/')[1]
-            let command1 = new DeleteObjectCommand({
-                Bucket: process.env.BUCKET_NAME,
-                Key: filename
-            })
-            let command2 = new DeleteObjectCommand({
-                Bucket: process.env.BUCKET_NAME,
-                Key: "small-"+filename
-            })
+            let delete1 = new DeleteObjectCommand(deleteOption(filename))
+            let delete2 = new DeleteObjectCommand(deleteOption(`small-${filename}`))
            
-            await s3.send(command1)
-            await s3.send(command2)
+            await s3.send(delete1)
+            await s3.send(delete2)
                 
             Project.deleteOne({_id: req.params.id})
                 .then(() => res.status(200).json({message: 'Projet supprimé'}))
                 .catch(error => res.status(400).json({ error }))
         }
-    } catch(e) {
-        console.log(e)
+    } catch(error) {
+        console.log(error)
         res.status(500).json({ error })
     }
  }

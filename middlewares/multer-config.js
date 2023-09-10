@@ -1,6 +1,6 @@
 const multer = require('multer')
 const multerS3 = require('multer-s3')
-const s3 = require('../config/connectionAws')
+const {s3} = require('../config/connectionAws')
 require('dotenv').config()
 
 
@@ -14,7 +14,7 @@ const videoStorage = multer({
 	  key: (req, file, cb) => {
 		let name = file.originalname.split(' ').join('_') //Construct a new name for the file
         let completeName = Date.now() + name
-		cb(null, Date.now().toString() + completeName)
+		cb(null, completeName)
 	  }
 	})
 })

@@ -1,6 +1,5 @@
 const Video = require('../models/Video')
-const fs = require('fs')
-const s3 = require('../config/connectionAws')
+const { s3, deleteOption } = require('../config/connectionAws')
 const { DeleteObjectCommand } = require('@aws-sdk/client-s3')
 
 
@@ -12,7 +11,7 @@ exports.getAllVideos = (req, res, next) => {
 }
 
 //Post a video
-exports.createVideo = async (req,res,next) => {
+exports.createVideo = (req,res,next) => {
     let newVideo = JSON.parse(req.body.content)
 
     delete newVideo.userId
@@ -29,30 +28,32 @@ exports.createVideo = async (req,res,next) => {
 
 //Modify a video
 exports.updateVideo = async (req, res, next) => {
-    let newVideo = JSON.parse(req.body.content)
-    let video = await Video.findOne({projectId: req.params.id})
-    delete newVideo.userId
+    try {
+        let newVideo = JSON.parse(req.body.content)
+        let video = await Video.findOne({projectId: req.params.id})
+        delete newVideo.userId
 
-    if (video.userId !== req.auth.userId) {
-        res.status(403).json({ message : 'unauthorized request'})
-    } else {
-        let filename = video.videoUrl.split('.com/')[1]
-        let deleteImage = new DeleteObjectCommand({
-            Bucket: process.env.BUCKET_NAME,
-            Key: filename
-        })
-        
-        await s3.send(deleteImage)
+        if (video.userId !== req.auth.userId) {
+            res.status(403).json({ message : 'unauthorized request'})
+        } else {
+            let filename = video.videoUrl.split('.com/')[1]
+            let deleteImage = new DeleteObjectCommand(deleteOption(filename))
+            
+            await s3.send(deleteImage)
 
-        Video.updateOne({projectId: req.params.id},
-            {
-                ...newVideo,
-                videoUrl: req.file.location,
-                userId: req.auth.userId,
-            }
-        )
-        .then(() => res.status(201).json({ message: 'Vidéo enregistrée'}))
-        .catch(error => res.status(400).json({ error }))
+            Video.updateOne({projectId: req.params.id},
+                {
+                    ...newVideo,
+                    videoUrl: req.file.location,
+                    userId: req.auth.userId,
+                }
+            )
+            .then(() => res.status(201).json({ message: 'Vidéo enregistrée'}))
+            .catch(error => res.status(400).json({ error }))
+        }
+    } catch(error) {
+        console.log(error)
+        res.status(500).json({ error })
     }
 }
 
@@ -65,20 +66,16 @@ exports.deleteVideo = async (req, res, next) => {
             res.status(403).json({message: 'unauthorized request'})
         } else {
             let filename = video.videoUrl.split('.com/')[1]
-            let command = new DeleteObjectCommand({
-                Bucket: process.env.BUCKET_NAME,
-                Key: filename
-            })
+            let deleteImage = new DeleteObjectCommand(deleteOption(filename))
             
-            await s3.send(command)
+            await s3.send(deleteImage)
             
             Video.deleteOne({projectId: req.params.id})
-                .then(() => res.status(200).json({message: 'Vidéo supprimée'}))
-                .catch(error => res.status(401).json({ error }))
+            .then(() => res.status(200).json({message: 'Vidéo supprimée'}))
+            .catch(error => res.status(401).json({ error }))
         }
     } catch(e) {
         console.log(e)
         res.status(500).json({ error })
     }
-   
  }
