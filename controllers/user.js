@@ -31,7 +31,7 @@ exports.login = (req, res, next) => {
 				if (!valid) {
 						return res.status(401).json({ message: 'Paire login/mot de passe incorrecte' })
 				}
-				let secret = fs.readFileSync('./middlewares/folder/.certs/one.pem')
+				let secret = fs.readFileSync('./one.pem')
 				res.status(200).json({
 						userId: user._id,
 						token: jwt.sign(
