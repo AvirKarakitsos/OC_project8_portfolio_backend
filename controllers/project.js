@@ -3,9 +3,8 @@ const Category = require('../models/Category')
 const Video = require('../models/Video')
 const fs = require('fs')
 const sharp = require('sharp')
-const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3')
-const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
-
+const { PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3')
+const s3 = require('../config/connectionAws')
 
 //Get all projects
 exports.getAllProjects =  async (req, res, next) => {
@@ -63,18 +62,7 @@ exports.createProject = async (req,res,next) => {
 
         delete projectObject.userId
 
-        const bucketName = process.env.BUCKET_NAME
-        const bucketRegion = process.env.BUCKET_REGION
-        const accessKey = process.env.ACCESS_KEY
-        const secretAccessKey = process.env.SECRET_ACCESS_KEY
-
-        const s3 = new S3Client({
-            credentials: {
-                accessKeyId: accessKey,
-                secretAccessKey: secretAccessKey,
-            },
-            region: bucketRegion
-        })
+        let bucketName = process.env.BUCKET_NAME
 
         let params1 = {
             Bucket: bucketName,
@@ -179,21 +167,33 @@ exports.updateProject = async (req, res, next) => {
 }
 
 //Delete one project
-exports.deleteProject = (req, res, next) => {
-    Project.findOne({ _id: req.params.id})
-    .then(project => {
+exports.deleteProject = async (req, res, next) => {
+    try {
+    
+        let project = await Project.findOne({ _id: req.params.id})
+    
         if (project.userId !== req.auth.userId) {
             res.status(403).json({message: 'unauthorized request'})
         } else {
-            let filename = project.imageUrl.split('/images/')[1]
-            fs.unlink(`images/${filename}`, () => {
-                fs.unlink(`images/small/${filename}`, () => {
-                    Project.deleteOne({_id: req.params.id})
-                    .then(() => { res.status(200).json({message: 'Projet supprimé'})})
-                    .catch(error => res.status(401).json({ error }))
-                })
+            let filename = project.imageUrl.split('.com/')[1]
+            let command1 = new DeleteObjectCommand({
+                Bucket: process.env.BUCKET_NAME,
+                Key: filename
             })
+            let command2 = new DeleteObjectCommand({
+                Bucket: process.env.BUCKET_NAME,
+                Key: "small-"+filename
+            })
+           
+            await s3.send(command1)
+            await s3.send(command2)
+                
+            Project.deleteOne({_id: req.params.id})
+                .then(() => res.status(200).json({message: 'Projet supprimé'}))
+                .catch(error => res.status(400).json({ error }))
         }
-    })
-    .catch( error => res.status(500).json({ error }))
+    } catch(e) {
+        console.log(e)
+        res.status(500).json({ error })
+    }
  }
