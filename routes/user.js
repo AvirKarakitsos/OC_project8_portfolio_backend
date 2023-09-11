@@ -1,11 +1,11 @@
 const express = require('express')
 const userController = require('../controllers/user')
-const { limiter } = require('../middlewares/limiter')
+//const { limiter } = require('../middlewares/limiter')
 
 const routes = express.Router()
 
 routes.post('/signup', userController.signup)
-routes.post('/login', limiter, userController.login)
+routes.post('/login', userController.login)
 
 module.exports = routes
 

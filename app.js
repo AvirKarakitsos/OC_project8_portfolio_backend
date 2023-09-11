@@ -21,7 +21,7 @@ const app = express()
 app.use(express.json())
 
 //Protect headers of requests
-app.set('trust proxy', true)
+//app.set('trust proxy', true)
 app.disable('x-powered-by')
 app.use(helmet(
     {
