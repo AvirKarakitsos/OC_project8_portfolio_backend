@@ -2,8 +2,9 @@ const rateLimit = require("express-rate-limit")
 
 const limiter = rateLimit({
     max: 3,
-    windowsMs: 60*1000,
+    windowMs: 60*1000,
     standardHeaders: false, // default value
+    message: "Don't spam! Thank you!",
     legacyHeaders: false // default value
 })
 
