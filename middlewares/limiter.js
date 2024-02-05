@@ -1,8 +1,10 @@
 const rateLimit = require("express-rate-limit")
 
-exports.limiter = rateLimit({
+const limiter = rateLimit({
     max: 3,
-    windowsMS: 60*1000,
-    standardHeaders: false,
-    legacyHeaders: false
+    windowsMs: 60*1000,
+    standardHeaders: false, // default value
+    legacyHeaders: false // default value
 })
+
+module.exports = limiter
