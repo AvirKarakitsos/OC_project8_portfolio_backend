@@ -9,10 +9,6 @@ const helmet = require('helmet')
 const fs = require('fs').promises
 require('dotenv').config()
 
-
-//const permission = 'http://localhost:3000'
-const permission = 'https://arnocotsoyannis-portfolio.onrender.com'
-
 const path = require('path')
 
 const app = express()
@@ -31,7 +27,7 @@ app.use(helmet(
 
 //CORS configuration
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', permission)
+    res.setHeader('Access-Control-Allow-Origin', process.env.CLIENT_URL)
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization')
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
     next()
